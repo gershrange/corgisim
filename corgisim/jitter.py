@@ -200,7 +200,7 @@ def Determine_ring_params(r_ring_inner,dr_ring,regnum_ring,theta_ring_centers_st
                 plus radial boundaries)
      Inputs:
             r_ring_inner: radius of the inner ring boundary
-            dr_ring:      with of the ring
+            dr_ring:      width of the ring
             regnum_ring:  number of regions within the ring
             theta_ring_centers_start: angle of the center of the first region
                                       IN DEGREES
@@ -593,7 +593,7 @@ def save_offsets_and_areas(x_offsets,y_offsets,A_offsets,N_rings_of_offsets):
 # Function for loading a predefined set of parameters for the jitter and finite
 # stellar diameter calculations
 
-def load_predefined_jitter_and_stellar_diam_params(starID=None):
+def load_predefined_jitter_and_stellar_diam_params(starID=None,offset_distribution_id=None):
     '''
      This function loads a predefined set of parameters for running 
      Determine_offsets_and_areas. If a star ID is given, a specific example
@@ -602,6 +602,10 @@ def load_predefined_jitter_and_stellar_diam_params(starID=None):
     
      Inputs:
             starID: Optional parameter to specify a particular star
+            offset_distribution_id: Optional parameter to specify a particular
+                                    offset to use.
+                                    The default is a distribution based on OS11
+                                    simulations.
     
      Outputs:
             stellar_diam_and_jitter_keywords: A dictionary containing all of the
@@ -610,24 +614,34 @@ def load_predefined_jitter_and_stellar_diam_params(starID=None):
     '''
     
     # The example stars that have been defined:
-    stars_defined = {'47 UMa c'}
+    stars_defined = {'47 UMa'}
     
     # Check that starID specifies one of these example stars if provided:
     if starID != None:
         if starID not in stars_defined:
             raise KeyError("ERROR: Specified star is not in the list of examples for the jitter and finite stellar diameter calculations.")
             
+    # Check that the offset_distribution_id specifies a defined offset distribution
+    # if provided.
+    available_offset_distributions = {'OS11 example'}
+    
+    if offset_distribution_id != None:
+        if offset_distribution_id not in available_offset_distributions:
+            raise KeyError({"ERROR: The specified offset distribution is not in the list of available distributions."})
+        
     # Initialize the dictionary
     stellar_diam_and_jitter_keywords = {}
     
-    # Load the appropriate example
-    if (starID == '47 UMa c') or (starID == None):
-        # Use parameters that approximately reproduce John Krist's example
+    # Load the appropriate stellar radius and diameter
+    if (starID == '47 UMa') or (starID == None):
         
         # Stellar diameter (used for top hat function)
         stellar_diam_and_jitter_keywords['r_stellar_disc_mas'] = 0.45
         stellar_diam_and_jitter_keywords['stellar_diam_mas'] = 2*stellar_diam_and_jitter_keywords['r_stellar_disc_mas']
         
+    # Load the appropriate offset distribution parameters
+    if (offset_distribution_id == None) or (offset_distribution_id == 'OS11 example'):
+        # Use parameters that approximately reproduce John Krist's example
         # Offset array parameters
         stellar_diam_and_jitter_keywords['N_rings_of_offsets'] = 11
         stellar_diam_and_jitter_keywords['N_offsets_per_ring'] = np.array([6,8,12,14,12,10,14,10,14,10,14])

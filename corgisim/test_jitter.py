@@ -14,12 +14,14 @@ Jitter and Finite Stellar Diameter Tests:
     
     test_offsets_and_areas_against_example: tests use of jitter.py against an example
     check_offset_weights: compares the calculated weights for the example offset list
-                          against a pre-calculated list for the same offsets (TODO)
+                          against a pre-calculated list for the same offsets
     test_obs_with_finite_stellar_diam: tests an observation sequence with finite stellar diameter included
     test_weight_calculation: shorter version of test_obs_with_finite_stellar_diam used to test the
                              addition of the lines that calculate the weights for the offset regions
     basic_weight_calculation_test: tests the interpolation method that replaces interp2d when calculating
                                    the weights
+    test_all_pol_obs_with_finite_stellar_diam: run through each polarization case,
+                                               checking that nothing is broken (TODO)
 
 """
 
