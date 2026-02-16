@@ -1,6 +1,6 @@
 import corgisim
 import pytest
-from corgisim import scene, instrument, observation, outputs, inputs, spec
+from corgisim import scene, instrument, observation, outputs, inputs, spec, jitter
 import matplotlib.pyplot as plt
 import numpy as np
 import proper
@@ -326,9 +326,54 @@ def test_pol_mode():
     assert np.any(image_comp_corgi_x != image_star_corgi_x)
     assert np.any(image_comp_corgi_y != image_star_corgi_y)
     
+###############################################################################
+def test_all_pol_obs_with_finite_stellar_diam():
+    '''
+    Test that the calculations run for optics.prism = 'POL0'
+    '''
+    # Set up keywords
+    # optics keywords
+    Vmag = 8
+    sptype = 'G0V'
+    stellar_diam_mas = 10 # Arbitrary for the purposes of this test
+    cgi_mode = 'excam'
+    bandpass_corgisim = '1F'
+    cor_type = 'hlc_band1'
+    cases = ['3e-8']       
+    rootname = 'hlc_ni_' + cases[0]
+    host_star_properties = {'Vmag': Vmag, 'spectral_type': sptype, 'magtype': 'vegamag','stellar_diam_mas':stellar_diam_mas}
+    dm1 = proper.prop_fits_read( roman_preflight_proper.lib_dir + '/examples/'+rootname+'_dm1_v.fits' )
+    dm2 = proper.prop_fits_read( roman_preflight_proper.lib_dir + '/examples/'+rootname+'_dm2_v.fits' )
+    
+    # emccd keywords
+    gain =1000
+    emccd_keywords ={'em_gain':gain}
+    
+    # Set up the detectior
+    detector = instrument.CorgiDetector( emccd_keywords)
+    
+    # Define the exposure time
+    exp_time = 2000
+    n_frames = 1
+    
+    # jitter and finite stellar diameter keywords
+    # need a clean set for each polarization
+    stellar_diam_keywords_pol0 = jitter.load_predefined_jitter_and_stellar_diam_params(mintest=True,stellar_diam_mas=stellar_diam_mas)
+    
+    # Define the scene
+    base_scene = scene.Scene(host_star_properties)
+    
+    # For pol0
+    prism = 'POL0'
+    optics_keywords_0_90 ={'cor_type':cor_type, 'use_errors':1, 'polaxis':-10, 'output_dim':201,'prism':prism,\
+                    'use_dm1':1, 'dm1_v':dm1, 'use_dm2':1, 'dm2_v':dm2,'use_fpm':1, 'use_lyot_stop':1,  'use_field_stop':1 }
+    optics_0_90 =  instrument.CorgiOptics(cgi_mode, bandpass_corgisim, oversampling_factor=3, optics_keywords=optics_keywords_0_90, stellar_diam_and_jitter_keywords=stellar_diam_keywords_pol0, if_quiet=True)
+    simulatedImage_list_0_90 = observation.generate_observation_sequence(base_scene, optics_0_90, detector, exp_time, n_frames)
+        
 if __name__ == '__main__':
     test_excam_mode()
     test_cpgs_obs()
     test_spc_mode()
     test_spec_mode()
     test_pol_mode()
+    test_all_pol_obs_with_finite_stellar_diam()

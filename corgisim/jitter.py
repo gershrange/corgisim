@@ -642,7 +642,7 @@ def load_predefined_jitter_and_stellar_diam_params(quicktest=False,mintest=False
         # Use a minimal subset of the example array (one ring) 
         # Offset array parameters
         stellar_diam_and_jitter_keywords['N_rings_of_offsets'] = 1
-        stellar_diam_and_jitter_keywords['N_offsets_per_ring'] = np.array([6])
+        stellar_diam_and_jitter_keywords['N_offsets_per_ring'] = np.array([1])
         stellar_diam_and_jitter_keywords['starting_offset_ang_by_ring'] = np.array([90])
         if stellar_diam_mas > 0:
             stellar_diam_and_jitter_keywords['r_ring0'] = (stellar_diam_mas/2)/(stellar_diam_and_jitter_keywords['N_rings_of_offsets']+1)

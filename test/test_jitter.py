@@ -315,8 +315,6 @@ def test_all_pol_obs_with_finite_stellar_diam():
     Test that the calculations run for optics.prism = 'POL0',
     optics.prism = 'POL45', and polaxis = -10
     '''
-    # TODO: Add pol0 and pol45 options
-    
     # Set up keywords
     # optics keywords
     Vmag = 8
