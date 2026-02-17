@@ -1217,6 +1217,8 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
                 and (stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] != 1):
                     raise KeyError("ERROR: If specified, use_saved_deltaE_and_weights in stellar_diam_and_jitter_keywords must be 0 or 1.")
         # If the delta electric fields and weights will be calculated:
+        if 'use_saved_deltaE_and_weights' not in stellar_diam_and_jitter_keywords.keys():
+            stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0 # default to calculating from scratch
         if stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] == 0:
             # Check that the required keys have been provided
             required_keys_stellar_diam = {'N_rings_of_offsets','N_offsets_per_ring','starting_offset_ang_by_ring'}
