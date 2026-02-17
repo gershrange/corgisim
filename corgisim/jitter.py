@@ -635,7 +635,7 @@ def load_predefined_jitter_and_stellar_diam_params(quicktest=False,mintest=False
         stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] = 1
         stellar_diam_and_jitter_keywords['add_jitter'] = 0
         stellar_diam_and_jitter_keywords['calculating_timeseries'] = 0
-        #stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0
+        stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0
         
     elif mintest == True:
         
@@ -652,7 +652,7 @@ def load_predefined_jitter_and_stellar_diam_params(quicktest=False,mintest=False
         stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = stellar_diam_and_jitter_keywords['r_ring0'] + np.sum(stellar_diam_and_jitter_keywords['dr_rings'])
         stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] = 1
         stellar_diam_and_jitter_keywords['add_jitter'] = 0
-        #stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0
+        stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0
         
     elif quicktest == True:
         
@@ -669,7 +669,7 @@ def load_predefined_jitter_and_stellar_diam_params(quicktest=False,mintest=False
         stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = stellar_diam_and_jitter_keywords['r_ring0'] + np.sum(stellar_diam_and_jitter_keywords['dr_rings'])
         stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] = 1
         stellar_diam_and_jitter_keywords['add_jitter'] = 0
-        #stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0
+        stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0
         
         
     # Return the dictionary
@@ -705,14 +705,13 @@ def build_delta_e_field_library(stellar_diam_and_jitter_keywords,optics,input_sc
     if missing_keys:
         raise KeyError(f"ERROR: Missing required keywords: {missing_keys}")
         
-    #         Also check that the stellar diameter is provided in the scene
-    if (input_scene.stellar_diam_mas==None):
-        raise KeyError('ERROR: Missing required keyword stellar_diam_mas in host_star_properties')
-        
-    #         and that the stellar diameter is a nonzero number
-    # Check that the provided stellar diameter is nonnegative        
-    if input_scene.stellar_diam_mas < 0:
-        raise KeyError('ERROR: stellar_diam_mas in host_star_properties must be nonnegative.')
+    #         Also check that the stellar diameter is provided in the scene if relevant
+    if ('use_finite_stellar_diam' in stellar_diam_and_jitter_keywords.keys()) and (stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] == 1):
+        if (input_scene.stellar_diam_mas==None):
+            raise KeyError('ERROR: Missing required keyword stellar_diam_mas in host_star_properties')
+        # Check that the provided stellar diameter is nonnegative        
+        if input_scene.stellar_diam_mas < 0:
+            raise KeyError('ERROR: stellar_diam_mas in host_star_properties must be nonnegative.')
     
     # To keep all of the stellar diameter and jitter parameters together,
     # add the stellar diameter to the keywords.
@@ -1174,7 +1173,7 @@ def calculate_weights_for_jitter_and_finite_stellar_diameter(stellar_diam_and_ji
     # If the calculations are for a time series, also add the offset weights
     # to offset_weights_all. If offset_weights contains the weights for more than
     # one timestep, instrument.construct_jittered_image_from_fields will break.
-    if stellar_diam_and_jitter_keywords['calculating_timeseries'] == 1:
+    if ('calculating_timeseries' in stellar_diam_and_jitter_keywords.keys()) and (stellar_diam_and_jitter_keywords['calculating_timeseries'] == 1):
         i_timestep = stellar_diam_and_jitter_keywords['i_timestep']
         # If offset_weights_all hasn't been set up yet, do so now
         if 'offset_weights_all' not in stellar_diam_and_jitter_keywords['offset_field_data'].keys():
