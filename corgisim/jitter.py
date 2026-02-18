@@ -1282,7 +1282,7 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
                         r_stellar_disc_mas = 0.5*stellar_diam_and_jitter_keywords['stellar_diam_mas']
                         stellar_diam_and_jitter_keywords['r_stellar_disc_mas'] = r_stellar_disc_mas
                         stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = r_stellar_disc_mas 
-            else:
+            elif (stellar_diam_and_jitter_keywords['add_jitter'] == 1):
                     # If the outer radius of the offset circle is not provided and if jitter is considered,
                     if 'outer_radius_of_offset_circle' not in stellar_diam_and_jitter_keywords.keys():
                         # set the radius to the sum of all the ring widths if these are provided
@@ -1292,10 +1292,10 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
                         elif ('dr_rings' in stellar_diam_and_jitter_keywords.keys()):
                             stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = \
                             0.075 + np.sum(stellar_diam_and_jitter_keywords['dr_rings'])
-                    else:
-                        # if the outer radius of the offset circle and the ring widths aren't provided,
-                        # throw an exception
-                        raise KeyError("ERROR: 'outer_radius_of_offset_circle' and 'dr_rings' are not defined in stellar_diam_and_jitter_keywords. One or both of these must be defined when adding jitter.")
+                        else:
+                            # if the outer radius of the offset circle and the ring widths aren't provided,
+                            # throw an exception
+                            raise KeyError("ERROR: 'outer_radius_of_offset_circle' and 'dr_rings' are not defined in stellar_diam_and_jitter_keywords. One or both of these must be defined when adding jitter.")
     
     # Next, check the keys specific to the each model
     # Currently, there are no keys specific to the finite stellar diameter model
