@@ -1193,32 +1193,59 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
     and that the provided information is usable.
     '''
     
+    # Set default values as needed
     if ('use_finite_stellar_diam' not in stellar_diam_and_jitter_keywords.keys()):
-        # Set the default (not adding stellar diameter or jitter)
+        # Set the default (not adding stellar diameter)
         stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] = 0
-        
-    elif stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] == 1: 
-        # Check that finite stellar diameter and jitter have been implemented for the selected mode
-        implemented_modes_stellar_diam = ['excam']
-        if optics.cgi_mode not in implemented_modes_stellar_diam:
-            raise KeyError('ERROR: Finite stellar diameter and jitter have not been implemented for this mode.')
-        # Check whether saved delta electric fields and weights will be used
+    if ('add_jiiter' not in stellar_diam_and_jitter_keywords.keys()):
+        # Set the default (not adding jitter)
+        stellar_diam_and_jitter_keywords['add_jitter'] = 0
+    if ((stellar_diam_and_jitter_keywords['use_finite_stellar_diam']==1) or \
+        (stellar_diam_and_jitter_keywords['add_jitter']==1)):
+        # If adding jitter or the stellar diameter, check if the option to use
+        # a saved library has been specified. Default to calculating from scratch
+        # if needed
         if 'use_saved_deltaE_and_weights' not in stellar_diam_and_jitter_keywords.keys():
-            # Default to calculating the delta electric fields and weights
             stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0
-        else:
-            # Check if the library has already been calculated
-            if stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] == 2:
-                # There needs to be an offset library already saved
-                if 'offset_field_data' not in stellar_diam_and_jitter_keywords.keys():
-                    raise KeyError('ERROR: use_saved_deltaE_and_weights = 2 but no offset field data library exists in stellar_diam_and_jitter_keywords.')
-            # Must be either 0 or 1
-            elif (stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] != 0) \
-                and (stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] != 1):
-                    raise KeyError("ERROR: If specified, use_saved_deltaE_and_weights in stellar_diam_and_jitter_keywords must be 0 or 1.")
-        # If the delta electric fields and weights will be calculated:
-        if 'use_saved_deltaE_and_weights' not in stellar_diam_and_jitter_keywords.keys():
-            stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] = 0 # default to calculating from scratch
+            
+    # Check that the required keys have been provided
+    
+    # First, check the keys common to the finite stellar diameter and jitter models
+    if ((stellar_diam_and_jitter_keywords['use_finite_stellar_diam']==1) or \
+        (stellar_diam_and_jitter_keywords['add_jitter']==1)):
+        
+        # Check that finite stellar diameter and jitter have been implemented for the selected mode
+        implemented_modes_stellar_diam_and_jitter = ['excam']
+        if optics.cgi_mode not in implemented_modes_stellar_diam_and_jitter:
+            raise KeyError('ERROR: Finite stellar diameter and jitter have not been implemented for this mode.')
+        
+        # Check the options for using a saved library of delta electric fields and weights
+        if stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] == 1:
+            # The specified key-value pair indicates that a saved library will be used
+            raise KeyError("ERROR: The option to use a saved library of delta electric fields and weights has not been implemented yet.")
+            # TODO: Add this option, along with the appropriate checks
+        elif stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] == 2:
+            # The specified key-value pair indicates that a library has been 
+            # calculated during this session and currently resides in the dictionary.
+            # Check that this library is in fact present.
+            if 'offset_field_data' not in stellar_diam_and_jitter_keywords.keys():
+                raise KeyError('ERROR: use_saved_deltaE_and_weights = 2 but no offset field data library exists in stellar_diam_and_jitter_keywords.')
+            # Also check that this library does in fact contain a set of weights
+            # and offset electric fields. 
+            else:
+                required_offset_library_keys = {'offset_weights','delta_e_fields'}
+                missing_offset_keys = required_offset_library_keys - stellar_diam_and_jitter_keywords['offset_field_data'].keys()
+                if missing_offset_keys:
+                    raise KeyError(f"ERROR: The offset field data library does not contain: {missing_offset_keys}")
+        elif stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] != 0:
+            # The valid options are 0 (calculate from scratch),
+            #                       1 (use a saved library),
+            #                       2 (use a library that exists in the dictionary)
+            raise KeyError("ERROR: If specified, use_saved_deltaE_and_weights in stellar_diam_and_jitter_keywords must be 0 (do not use a saved library), 1 (use a saved library), or 2 (use the library already in stellar_diam_and_jitter_keywords).")
+        
+        # If the delta electric fields and weights will be calculated, check that the 
+        # necessary parameters for defining the offset source distribution have been
+        # provided and specified correctly, and set defaults as appropriate
         if stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] == 0:
             # Check that the required keys have been provided
             required_keys_stellar_diam = {'N_rings_of_offsets','N_offsets_per_ring','starting_offset_ang_by_ring'}
@@ -1253,18 +1280,25 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
                     if 'outer_radius_of_offset_circle' not in stellar_diam_and_jitter_keywords.keys():
                         r_stellar_disc_mas = 0.5*stellar_diam_and_jitter_keywords['stellar_diam_mas']
                         stellar_diam_and_jitter_keywords['r_stellar_disc_mas'] = r_stellar_disc_mas
-                        stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = r_stellar_disc_mas
-                        
-        elif stellar_diam_and_jitter_keywords['use_saved_deltaE_and_weights'] == 1:
-            # If the delta electric fields and weights will be loaded from a file,
-            # check that the file has been provided
-            raise KeyError("ERROR: The use of saved weights and delta electric fields has not been implemented yet.")
-            #TODO: ADD the lines that are required to load a saved file
-
-    elif (stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 0) and (stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 1):
+                        stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = r_stellar_disc_mas        
+    
+    # Next, check the keys specific to the each model
+    # Currently, there are no keys specific to the finite stellar diameter model
+    # except for the one to indicate that the model should be used.
+    if (stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 0) and (stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 1):
         # use_finite_stellar_diam must be either 1 or 0 if specified
         raise KeyError("ERROR: If specified, use_finite_stellar_diam in stellar_diam_and_jitter_keywords must be 0 or 1.")
     
+    # For the jitter model, there are two unique parameters in addition to
+    # the one that specifies the model should be used.
+    if stellar_diam_and_jitter_keywords['add_jitter'] == 1:
+        required_jitter_keys = {'jitter_sigmax','jitter_sigmay'}
+        missing_jitter_keys = required_jitter_keys - stellar_diam_and_jitter_keywords.keys()
+        if missing_jitter_keys:
+            raise KeyError(f"ERROR: Missing required stellar_diam_and_jitter_keywords: {missing_jitter_keys}")
+    elif stellar_diam_and_jitter_keywords['add_jitter'] != 0:
+        raise KeyError("ERROR: 'add_jitter' in stellar_diam_and_jitter_keywords must be 0 or 1.")
+
     return stellar_diam_and_jitter_keywords
         
         
