@@ -1273,14 +1273,30 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
                 if np.isscalar(stellar_diam_and_jitter_keywords['dr_rings']) == False \
                     and stellar_diam_and_jitter_keywords['dr_rings'].shape != (stellar_diam_and_jitter_keywords['N_rings_of_offsets'],):
                         raise KeyError(("ERROR: dr_rings in stellar_diam_and_jitter_keywords must be either a scalar or an array with N_rings_of_offsets elements."))
-            # If the outer radius of the offset circle is not provided and if jitter will not be considered,
-            # set the outer radius of the offset circle to match the radius of the stellar disc.
+            # Set the default for the outer radius of the offset circle if needed.
             if ('add_jitter' not in stellar_diam_and_jitter_keywords.keys()) or \
                 stellar_diam_and_jitter_keywords['add_jitter'] != 1:
+                    # If the outer radius of the offset circle is not provided and if jitter will not be considered,
+                    # set the outer radius of the offset circle to match the radius of the stellar disc.
                     if 'outer_radius_of_offset_circle' not in stellar_diam_and_jitter_keywords.keys():
                         r_stellar_disc_mas = 0.5*stellar_diam_and_jitter_keywords['stellar_diam_mas']
                         stellar_diam_and_jitter_keywords['r_stellar_disc_mas'] = r_stellar_disc_mas
-                        stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = r_stellar_disc_mas        
+                        stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = r_stellar_disc_mas 
+            elif ('use_finite_stellar_diam' not in stellar_diam_and_jitter_keywords.keys()) or \
+                stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 1:
+                    # If the outer radius of the offset circle is not provided and if jitter is considered,
+                    if 'outer_radius_of_offset_circle' not in stellar_diam_and_jitter_keywords.keys():
+                        # set the radius to the sum of all the ring radii if these are provided
+                        if ('r_ring0' in stellar_diam_and_jitter_keywords.keys()) and ('dr_rings' in stellar_diam_and_jitter_keywords.keys()):
+                            stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = \
+                            stellar_diam_and_jitter_keywords['r_ring0'] + np.sum(stellar_diam_and_jitter_keywords['dr_rings'])
+                        elif ('dr_rings' in stellar_diam_and_jitter_keywords.keys()):
+                            stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = \
+                            0.075 + np.sum(stellar_diam_and_jitter_keywords['dr_rings'])
+                    else:
+                        # if the outer radius of the offset circle and the ring radii aren't provided,
+                        # throw an exception
+                        raise KeyError("ERROR: 'outer_radius_of_offset_circle' and 'dr_rings' are not defined in stellar_diam_and_jitter_keywords. One or both of these must be defined when adding jitter.")
     
     # Next, check the keys specific to the each model
     # Currently, there are no keys specific to the finite stellar diameter model
@@ -1288,6 +1304,9 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
     if (stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 0) and (stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 1):
         # use_finite_stellar_diam must be either 1 or 0 if specified
         raise KeyError("ERROR: If specified, use_finite_stellar_diam in stellar_diam_and_jitter_keywords must be 0 or 1.")
+    # There is, however, a specific default for the outer radius of the offset circle,
+    # which is defined above.
+    
     
     # For the jitter model, there are two unique parameters in addition to
     # the one that specifies the model should be used.
