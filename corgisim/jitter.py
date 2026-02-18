@@ -1197,7 +1197,7 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
     if ('use_finite_stellar_diam' not in stellar_diam_and_jitter_keywords.keys()):
         # Set the default (not adding stellar diameter)
         stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] = 0
-    if ('add_jiiter' not in stellar_diam_and_jitter_keywords.keys()):
+    if ('add_jitter' not in stellar_diam_and_jitter_keywords.keys()):
         # Set the default (not adding jitter)
         stellar_diam_and_jitter_keywords['add_jitter'] = 0
     if ((stellar_diam_and_jitter_keywords['use_finite_stellar_diam']==1) or \
