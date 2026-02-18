@@ -1282,11 +1282,10 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
                         r_stellar_disc_mas = 0.5*stellar_diam_and_jitter_keywords['stellar_diam_mas']
                         stellar_diam_and_jitter_keywords['r_stellar_disc_mas'] = r_stellar_disc_mas
                         stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = r_stellar_disc_mas 
-            elif ('use_finite_stellar_diam' not in stellar_diam_and_jitter_keywords.keys()) or \
-                stellar_diam_and_jitter_keywords['use_finite_stellar_diam'] != 1:
+            else:
                     # If the outer radius of the offset circle is not provided and if jitter is considered,
                     if 'outer_radius_of_offset_circle' not in stellar_diam_and_jitter_keywords.keys():
-                        # set the radius to the sum of all the ring radii if these are provided
+                        # set the radius to the sum of all the ring widths if these are provided
                         if ('r_ring0' in stellar_diam_and_jitter_keywords.keys()) and ('dr_rings' in stellar_diam_and_jitter_keywords.keys()):
                             stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = \
                             stellar_diam_and_jitter_keywords['r_ring0'] + np.sum(stellar_diam_and_jitter_keywords['dr_rings'])
@@ -1294,7 +1293,7 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
                             stellar_diam_and_jitter_keywords['outer_radius_of_offset_circle'] = \
                             0.075 + np.sum(stellar_diam_and_jitter_keywords['dr_rings'])
                     else:
-                        # if the outer radius of the offset circle and the ring radii aren't provided,
+                        # if the outer radius of the offset circle and the ring widths aren't provided,
                         # throw an exception
                         raise KeyError("ERROR: 'outer_radius_of_offset_circle' and 'dr_rings' are not defined in stellar_diam_and_jitter_keywords. One or both of these must be defined when adding jitter.")
     
