@@ -1215,7 +1215,7 @@ def setup_stellar_diam_and_jitter(optics,stellar_diam_and_jitter_keywords):
         (stellar_diam_and_jitter_keywords['add_jitter']==1)):
         
         # Check that finite stellar diameter and jitter have been implemented for the selected mode
-        implemented_modes_stellar_diam_and_jitter = ['excam']
+        implemented_modes_stellar_diam_and_jitter = ['excam','spec']
         if optics.cgi_mode not in implemented_modes_stellar_diam_and_jitter:
             raise KeyError('ERROR: Finite stellar diameter and jitter have not been implemented for this mode.')
         
